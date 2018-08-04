@@ -127,7 +127,7 @@ function handleMessage(sender_psid, received_message) {
           "text": "Your balance is " + balance
         });
           callSendAPI(sender_psid, {
-            "text": "Thank you!";
+            "text": "Thank you!",
           });
       });
     }
