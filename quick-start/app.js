@@ -124,7 +124,7 @@ function handleMessage(sender_psid, received_message) {
       console.log("Address: " + address);
       getBalance(address, balance => {
         callSendAPI(sender_psid, {
-          "text": "Your balance is BTC " + balance/100000000;
+          "text": "Your balance is BTC " + balance/100000000,
         });
           callSendAPI(sender_psid, {
             "text": "Thank you!",
