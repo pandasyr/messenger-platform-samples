@@ -132,7 +132,7 @@ function handleMessage(sender_psid, received_message) {
         console.log("Transaction Address: " + address);
         getTransactions(address, transactions => {
           callSendAPI(sender_psid, {
-            "text": "Your recent transactions " + JSON.stringify(transactions, null, 2),
+            "text": "Your recent transactions " + formatTransactions(transactions),
           });
         });
     }
@@ -206,13 +206,13 @@ function getTransactions(address, callback) {
       txsReceived {
         data {
           total
-          fees
+          blockHeight
         }
       }
       txsSent {
         data {
           total
-          fees
+          blockHeight
         }
       }
     }
@@ -227,5 +227,16 @@ function getTransactions(address, callback) {
     })
   }
 
+function formatTransactions(txs) {
+  let result = "\n";
+  for (let i in txs.received) {
+    result += "Received BTC " + txs.received[i].total / 100000000 + " at Block " + txs.received[i].blockHeight + "\n";
+  }
+  for (let i in txs.sent) {
+    result += "Sent BTC " + txs.sent[i].total / 100000000 + " at Block " + txs.sent[i].blockHeight + "\n";
+  }
+  return result;
+}
+
 getBalance('1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX', balance => console.log(balance));
-getTransactions('1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX', balance => console.log(balance));
+getTransactions('1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX', txs => console.log(formatTransactions(txs)));
