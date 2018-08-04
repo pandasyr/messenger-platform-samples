@@ -137,8 +137,6 @@ function handleMessage(sender_psid, received_message) {
         });
     }
     //callSendAPI(sender_psid, response);
-  } else {
-    res.sendStatus(200);
   }
 }
 
@@ -221,10 +219,11 @@ function getTransactions(address, callback) {
   }`;
     const variables = { address: address };
     graphql('https://ocap.arcblock.io/api/btc', query, variables).then(data => {
-      callback({
+      let transactions = {
         received: data.accountByAddress.txsReceived.data,
         sent: data.accountByAddress.txsSent.data,
-      });
+      };
+      callback(transactions);
     })
   }
 
