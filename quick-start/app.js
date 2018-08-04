@@ -21,9 +21,9 @@
  */
 
 'use strict';
-const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+const PAGE_ACCESS_TOKEN = "EAAX0gaT48FsBAAr4UAz2zdKYQMzeWyqA8Pjk7IRfBZCKZBeqEnLsB9qBxaUezws98hVFQAgPPJrRMRi9DL9eXPY819Uz8xG5vdx9MdcVhJqAalmZAd0qs8GB1bSaOc5OZA81ZA6UB0jKMvaBzo7VMMk9OhZAqOaO1mHDvPvDZCbRQZDZD";
 // Imports dependencies and set up http server
-const 
+const
   request = require('request'),
   express = require('express'),
   body_parser = require('body-parser'),
@@ -33,7 +33,7 @@ const
 app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
 
 // Accepts POST requests at /webhook endpoint
-app.post('/webhook', (req, res) => {  
+app.post('/webhook', (req, res) => {
 
   // Parse the request body from the POST
   let body = req.body;
@@ -55,12 +55,12 @@ app.post('/webhook', (req, res) => {
       // Check if the event is a message or postback and
       // pass the event to the appropriate handler function
       if (webhook_event.message) {
-        handleMessage(sender_psid, webhook_event.message);        
+        handleMessage(sender_psid, webhook_event.message);
       } else if (webhook_event.postback) {
-        
+
         handlePostback(sender_psid, webhook_event.postback);
       }
-      
+
     });
     // Return a '200 OK' response to all events
     res.status(200).send('EVENT_RECEIVED');
@@ -74,37 +74,37 @@ app.post('/webhook', (req, res) => {
 
 // Accepts GET requests at the /webhook endpoint
 app.get('/webhook', (req, res) => {
-  
+
   /** UPDATE YOUR VERIFY TOKEN **/
   const VERIFY_TOKEN = "<YOUR VERIFY TOKEN>";
-  
+
   // Parse params from the webhook verification request
   let mode = req.query['hub.mode'];
   let token = req.query['hub.verify_token'];
   let challenge = req.query['hub.challenge'];
-    
+
   // Check if a token and mode were sent
   if (mode && token) {
-  
+
     // Check the mode and token sent are correct
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      
+
       // Respond with 200 OK and challenge token from the request
       console.log('WEBHOOK_VERIFIED');
       res.status(200).send(challenge);
-    
+
     } else {
       // Responds with '403 Forbidden' if verify tokens do not match
-      res.sendStatus(403);      
+      res.sendStatus(403);
     }
   }
 });
 
 function handleMessage(sender_psid, received_message) {
   let response;
-  
+
   // Checks if the message contains text
-  if (received_message.text) {    
+  if (received_message.text) {
     // Create the payload for a basic text message, which
     // will be added to the body of our request to the Send API
     response = {
@@ -138,10 +138,10 @@ function handleMessage(sender_psid, received_message) {
         }
       }
     }
-  } 
-  
+  }
+
   // Send the response message
-  callSendAPI(sender_psid, response);    
+  callSendAPI(sender_psid, response);
 }
 
 function handlePostback(sender_psid, received_postback) {
@@ -181,5 +181,22 @@ function callSendAPI(sender_psid, response) {
     } else {
       console.error("Unable to send message:" + err);
     }
-  }); 
+  });
 }
+
+const graphql = require('graphql-request').request;
+
+const query = `query ($address: String!) {
+  accountByAddress(address: $address) {
+    address
+    balance
+    pubKey
+    scriptType
+    subKeys
+  }
+}`;
+
+const variables = { address: '1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX' };
+
+console.log(JSON.stringify(graphql));
+graphql('https://ocap.arcblock.io/api/btc', query, variables).then(data => console.log(data));
