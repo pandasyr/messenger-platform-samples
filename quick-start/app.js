@@ -21,6 +21,7 @@
  */
 
 let subscribers = {};
+let addresses = {};
 
 'use strict';
 const PAGE_ACCESS_TOKEN = "EAAX0gaT48FsBAAr4UAz2zdKYQMzeWyqA8Pjk7IRfBZCKZBeqEnLsB9qBxaUezws98hVFQAgPPJrRMRi9DL9eXPY819Uz8xG5vdx9MdcVhJqAalmZAd0qs8GB1bSaOc5OZA81ZA6UB0jKMvaBzo7VMMk9OhZAqOaO1mHDvPvDZCbRQZDZD";
@@ -124,6 +125,11 @@ function handleMessage(sender_psid, received_message) {
     } else if (match[1] == 'Balance') {
       let address = match[2];
       console.log("Balance Address: " + address);
+      if (address != null) {
+        addresses[sender_psid] = address;
+      } else {
+        address = addresses[sender_psid];
+      }
       getBalance(address, balance => {
         callSendAPI(sender_psid, {
           "text": "Your balance is BTC " + balance/100000000 + ".",
@@ -132,6 +138,11 @@ function handleMessage(sender_psid, received_message) {
     } else if (match[1] == 'Transactions') {
         let address = match[2];
         console.log("Transaction Address: " + address);
+        if (address != null) {
+          addresses[sender_psid] = address;
+        } else {
+          address = addresses[sender_psid];
+        }
         getTransactions(address, transactions => {
           callSendAPI(sender_psid, {
             "text": "Your recent transactions " + formatTransactions(transactions),
