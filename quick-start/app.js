@@ -100,6 +100,11 @@ app.get('/webhook', (req, res) => {
   }
 });
 
+// Accepts GET requests at the /webhook endpoint
+app.get('/healthcheck', (req, res) => {
+      res.sendStatus(200);
+    });
+
 function handleMessage(sender_psid, received_message) {
   let response;
 
