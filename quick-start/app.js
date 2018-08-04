@@ -112,12 +112,22 @@ function handleMessage(sender_psid, received_message) {
   if (received_message.text) {
     // Create the payload for a basic text message, which
     // will be added to the body of our request to the Send API
-    let address = received_message.text.split(':')[1];
-    console.log("Address: " + address);
-    // response = {
-    //   "text": `You sent the message: "${received_message.text}". Now send me an attachment!`
-    // }
-    getBalance(address, balance => callSendAPI(sender_psid, "Your balance is " + balance));
+    console.log("TEXT: " + received_message.text);
+    let match = received_message.text.match(/^Address\s(.*)$/)[1];
+    if (!match) {
+      response = {
+        "text": "Invalid request"
+      }
+      callSendAPI(sender_psid, response);
+    } else {
+      console.log("Address: " + address);
+      response = {
+        "text": `You sent the message: "${received_message.text}". Now send me an attachment!`
+      }
+      getBalance(address, balance => callSendAPI(sender_psid, {
+        "text": "Your balance is " + balance
+      }));
+    }
     //callSendAPI(sender_psid, response);
   } else {
     res.sendStatus(200);
