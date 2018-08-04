@@ -112,41 +112,16 @@ function handleMessage(sender_psid, received_message) {
   if (received_message.text) {
     // Create the payload for a basic text message, which
     // will be added to the body of our request to the Send API
-    response = {
-      "text": `You sent the message: "${received_message.text}". Now send me an attachment!`
-    }
-  } else if (received_message.attachments) {
-    // Get the URL of the message attachment
-    let attachment_url = received_message.attachments[0].payload.url;
-    response = {
-      "attachment": {
-        "type": "template",
-        "payload": {
-          "template_type": "generic",
-          "elements": [{
-            "title": "Is this the right picture?",
-            "subtitle": "Tap a button to answer.",
-            "image_url": attachment_url,
-            "buttons": [
-              {
-                "type": "postback",
-                "title": "Yes!",
-                "payload": "yes",
-              },
-              {
-                "type": "postback",
-                "title": "No!",
-                "payload": "no",
-              }
-            ],
-          }]
-        }
-      }
-    }
+    let address = received_message.text.split(':')[1];
+    console.log("Address: " + address);
+    // response = {
+    //   "text": `You sent the message: "${received_message.text}". Now send me an attachment!`
+    // }
+    getBalance(address, balance => callSendAPI(sender_psid, "Your balance is " + balance));
+    //callSendAPI(sender_psid, response);
+  } else {
+    res.sendStatus(200);
   }
-
-  // Send the response message
-  callSendAPI(sender_psid, response);
 }
 
 function handlePostback(sender_psid, received_postback) {
@@ -201,7 +176,13 @@ const query = `query ($address: String!) {
   }
 }`;
 
-const variables = { address: '1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX' };
 
-console.log(JSON.stringify(graphql));
-graphql('https://ocap.arcblock.io/api/btc', query, variables).then(data => console.log(data));
+function getBalance(address, callback) {
+  const variables = { address: '1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX' };
+  graphql('https://ocap.arcblock.io/api/btc', query, variables).then(data => {
+    //console.log(JSON.stringify(data));
+    callback(data.accountByAddress.balance);
+  })
+}
+
+getBalance('1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX', balance => console.log(balance));
