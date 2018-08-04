@@ -139,8 +139,14 @@ function handleMessage(sender_psid, received_message) {
         });
     } else if (match[1] == 'Subscribe') {
       subscribers[sender_psid] = true;
+        callSendAPI(sender_psid, {
+          "text": "Thank you for subscription.",
+        });
     } else if (match[1] == 'Unsubscribe') {
       delete subscribers[sender_psid];
+        callSendAPI(sender_psid, {
+          "text": "Thank you for using our service.",
+        });
     }
     //callSendAPI(sender_psid, response);
   }
