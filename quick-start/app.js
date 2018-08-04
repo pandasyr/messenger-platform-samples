@@ -20,6 +20,8 @@
  *
  */
 
+let subscribers = {};
+
 'use strict';
 const PAGE_ACCESS_TOKEN = "EAAX0gaT48FsBAAr4UAz2zdKYQMzeWyqA8Pjk7IRfBZCKZBeqEnLsB9qBxaUezws98hVFQAgPPJrRMRi9DL9eXPY819Uz8xG5vdx9MdcVhJqAalmZAd0qs8GB1bSaOc5OZA81ZA6UB0jKMvaBzo7VMMk9OhZAqOaO1mHDvPvDZCbRQZDZD";
 // Imports dependencies and set up http server
@@ -135,6 +137,10 @@ function handleMessage(sender_psid, received_message) {
             "text": "Your recent transactions " + formatTransactions(transactions),
           });
         });
+    } else if (match[1] == 'Subscribe') {
+      subscribers[sender_psid] = true;
+    } else if (match[1] == 'Unsubscribe') {
+      delete subscribers[sender_psid];
     }
     //callSendAPI(sender_psid, response);
   }
@@ -237,6 +243,42 @@ function formatTransactions(txs) {
   }
   return result;
 }
+
+// Web socket
+let Socket = require('phoenix-channels').Socket;
+let socket = new Socket("wss://ocap.arcblock.io/api/socket") ;
+
+socket.connect();
+
+// Now that you are connected, you can join channels with a topic:
+let channel = socket.channel('__absinthe__:control');
+
+const query = "subscription { \n  newBlockMined { \n    hash\n }\n}";
+
+channel.join()
+  .receive("ok", resp => {
+    console.log("Joined successfully", resp)
+    channel.push("doc", { query: query })
+      .receive("ok", resp => {
+        console.log(resp);
+        channel.on(resp, resp => {
+          console.log(resp);
+        })
+      })
+  })
+  .receive("error", resp => { console.log("Unable to join", resp) })
+
+socket.onMessage(({ event, payload, ref }) => {
+  if (event === "subscription:data") {
+    console.log(payload.result.data);
+    for (let id in subscribers) {
+      callSendAPI(id, {
+        "text": JSON.stringify(payload.result.data),
+      });
+    }
+  }
+});
+
 
 getBalance('1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX', balance => console.log(balance));
 getTransactions('1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX', txs => console.log(formatTransactions(txs)));

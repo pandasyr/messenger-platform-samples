@@ -16,6 +16,7 @@
     "body-parser": "^1.15.0",
     "express": "^4.13.4",
     "graphql-request": "^1.8.0",
+    "phoenix-channels": "^1.0.0",
     "request": "^2.72.0"
   },
   "engines": {
