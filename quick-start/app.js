@@ -208,19 +208,25 @@ function getTransactions(address, callback) {
       txsReceived {
         data {
           total
+          fees
         }
       }
-      txsReceived {
+      txsSent {
         data {
           total
+          fees
         }
       }
     }
   }`;
     const variables = { address: address };
     graphql('https://ocap.arcblock.io/api/btc', query, variables).then(data => {
-      callback(data.accountByAddress);
+      callback({
+        received: data.accountByAddress.txsReceived.data,
+        sent: data.accountByAddress.txsSent.data,
+      });
     })
   }
 
 getBalance('1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX', balance => console.log(balance));
+getTransactions('1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX', balance => console.log(balance));
