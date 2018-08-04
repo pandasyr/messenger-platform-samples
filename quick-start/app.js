@@ -115,7 +115,7 @@ function handleMessage(sender_psid, received_message) {
     // Create the payload for a basic text message, which
     // will be added to the body of our request to the Send API
     console.log("TEXT: " + received_message.text);
-    let match = received_message.text.match(/([a-zA-Z]*)\s([a-zA-Z0-9]*)/);
+    let match = received_message.text.match(/([a-zA-Z]*)\s?([a-zA-Z0-9]*)/);
     if (!match) {
       response = {
         "text": "Invalid request"
