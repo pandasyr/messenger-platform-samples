@@ -113,23 +113,28 @@ function handleMessage(sender_psid, received_message) {
     // Create the payload for a basic text message, which
     // will be added to the body of our request to the Send API
     console.log("TEXT: " + received_message.text);
-    let match = received_message.text.match(/Balance\s([a-zA-Z0-9]*)/);
+    let match = received_message.text.match(/([a-zA-Z]*)\s([a-zA-Z0-9]*)/);
     if (!match) {
       response = {
         "text": "Invalid request"
       }
       callSendAPI(sender_psid, response);
-    } else {
-      let address = match[1];
-      console.log("Address: " + address);
+    } else if (match[1] == 'Balance') {
+      let address = match[2];
+      console.log("Balance Address: " + address);
       getBalance(address, balance => {
         callSendAPI(sender_psid, {
-          "text": "Your balance is BTC " + balance/100000000,
+          "text": "Your balance is BTC " + balance/100000000 + ".",
         });
-          callSendAPI(sender_psid, {
-            "text": "Thank you!",
-          });
       });
+    } else if (match[1] == 'Transactions') {
+        let address = match[2];
+        console.log("Transaction Address: " + address);
+        getTransactions(address, transactions => {
+          callSendAPI(sender_psid, {
+            "text": "Your recent transactions " + JSON.stringify(transactions, null, 2),
+          });
+        });
     }
     //callSendAPI(sender_psid, response);
   } else {
@@ -179,6 +184,9 @@ function callSendAPI(sender_psid, response) {
 
 const graphql = require('graphql-request').request;
 
+
+
+function getBalance(address, callback) {
 const query = `query ($address: String!) {
   accountByAddress(address: $address) {
     address
@@ -188,14 +196,31 @@ const query = `query ($address: String!) {
     subKeys
   }
 }`;
-
-
-function getBalance(address, callback) {
-  const variables = { address: '1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX' };
+  const variables = { address: address };
   graphql('https://ocap.arcblock.io/api/btc', query, variables).then(data => {
-    //console.log(JSON.stringify(data));
     callback(data.accountByAddress.balance);
   })
 }
+
+function getTransactions(address, callback) {
+  const query = `query ($address: String!) {
+    accountByAddress(address: $address) {
+      txsReceived {
+        data {
+          total
+        }
+      }
+      txsReceived {
+        data {
+          total
+        }
+      }
+    }
+  }`;
+    const variables = { address: address };
+    graphql('https://ocap.arcblock.io/api/btc', query, variables).then(data => {
+      callback(data.accountByAddress);
+    })
+  }
 
 getBalance('1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX', balance => console.log(balance));
